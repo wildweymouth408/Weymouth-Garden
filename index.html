@@ -1,1 +1,144 @@
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Weymouth Garden</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f0f7ee; color: #2d4a22; min-height: 100vh; }
+    header { background: #2d7d32; color: white; padding: 1.5rem 2rem; text-align: center; }
+    header h1 { font-size: 2rem; }
+    header p { opacity: 0.85; margin-top: 0.25rem; }
+    .container { max-width: 1100px; margin: 2rem auto; padding: 0 1rem; }
+    .zones-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
+    .zone-card { background: white; border-radius: 12px; padding: 1.25rem; box-shadow: 0 2px 12px rgba(0,0,0,0.1); border-top: 5px solid #4caf50; }
+    .zone-card.beds { border-top-color: #795548; }
+    .zone-card.pots { border-top-color: #ff9800; }
+    .zone-card.hanging { border-top-color: #9c27b0; }
+    .zone-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; }
+    .zone-icon { font-size: 1.5rem; font-weight: 700; color: #555; width: 2.5rem; }
+    .zone-title h2 { font-size: 1.1rem; font-weight: 700; }
+    .zone-title p { font-size: 0.8rem; color: #666; }
+    .plant-slot { background: #f9f9f9; border: 2px dashed #ccc; border-radius: 8px; padding: 0.75rem; margin-bottom: 0.5rem; cursor: pointer; }
+    .plant-slot:hover { border-color: #4caf50; background: #f0f7f0; }
+    .plant-slot.planted { border-style: solid; border-color: #4caf50; background: #e8f5e9; }
+    .plant-slot.planted .slot-label { color: #2e7d32; font-weight: 600; }
+    .slot-label { font-size: 0.9rem; color: #888; }
+    .slot-actions { display: none; margin-top: 0.5rem; }
+    .plant-slot.active .slot-actions { display: block; }
+    .slot-actions input, .slot-actions select { width: 100%; padding: 0.4rem; border: 1px solid #ccc; border-radius: 4px; font-size: 0.85rem; margin-bottom: 0.35rem; }
+    .btn { padding: 0.35rem 0.75rem; border: none; border-radius: 5px; font-size: 0.8rem; cursor: pointer; margin-right: 0.25rem; }
+    .btn-green { background: #4caf50; color: white; }
+    .btn-red { background: #e53935; color: white; }
+    .btn-blue { background: #1976d2; color: white; }
+    .plant-info { font-size: 0.82rem; color: #555; margin-top: 0.25rem; }
+    .status-badge { display: inline-block; font-size: 0.7rem; padding: 0.15rem 0.5rem; border-radius: 10px; font-weight: 600; margin-left: 0.5rem; }
+    .status-seedling { background: #fff9c4; color: #f57f17; }
+    .status-growing { background: #c8e6c9; color: #1b5e20; }
+    .status-flowering { background: #f8bbd9; color: #880e4f; }
+    .status-harvest { background: #ffe0b2; color: #e65100; }
+    .section-title { font-size: 1.3rem; font-weight: 700; margin: 2rem 0 1rem; color: #2d4a22; border-bottom: 2px solid #c8e6c9; padding-bottom: 0.5rem; }
+    .notes-section { background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 12px rgba(0,0,0,0.1); margin-top: 1.5rem; }
+    .notes-section textarea { width: 100%; padding: 0.75rem; border: 1px solid #ccc; border-radius: 8px; font-size: 0.9rem; resize: vertical; min-height: 100px; font-family: inherit; }
+    .stats-bar { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+    .stat { background: white; border-radius: 10px; padding: 1rem 1.5rem; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.08); flex: 1; min-width: 120px; }
+    .stat-num { font-size: 2rem; font-weight: 700; color: #2d7d32; }
+    .stat-label { font-size: 0.8rem; color: #888; margin-top: 0.15rem; }
+    .watering-log { font-size: 0.75rem; color: #888; margin-top: 0.25rem; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Weymouth Garden</h1>
+    <p>Dad's backyard garden tracker - 2 Raised Beds, 4 Pots, 4 Hanging Pots</p>
+  </header>
+  <div class="container">
+    <div class="stats-bar" id="statsBar"></div>
+    <div class="section-title">Raised Beds</div>
+    <div class="zones-grid" id="bedsZone"></div>
+    <div class="section-title">2-Foot Pots</div>
+    <div class="zones-grid" id="potsZone"></div>
+    <div class="section-title">1-Foot Hanging Pots</div>
+    <div class="zones-grid" id="hangingZone"></div>
+    <div class="notes-section">
+      <h3>Garden Notes</h3>
+      <textarea id="notesArea" placeholder="Write your garden notes here..."></textarea>
+      <button class="btn btn-green" onclick="saveNotes()">Save Notes</button>
+    </div>
+  </div>
+  <script>
+    var STATUSES=['seedling','growing','flowering','harvest'];
+    var STATUS_LABELS={seedling:'Seedling',growing:'Growing',flowering:'Flowering',harvest:'Ready to Harvest'};
+    var garden=JSON.parse(localStorage.getItem('weymouthGarden')||'null')||{
+      beds:[
+        {id:'bed1',name:'Raised Bed 1',size:'8ft x 21in x 12in',icon:'B1',slots:Array(8).fill(null).map(function(_,i){return {id:'b1s'+i,plant:'',status:'seedling',watered:null,notes:''}; })},
+        {id:'bed2',name:'Raised Bed 2',size:'8ft x 21in x 12in',icon:'B2',slots:Array(8).fill(null).map(function(_,i){return {id:'b2s'+i,plant:'',status:'seedling',watered:null,notes:''}; })}
+      ],
+      pots:Array(4).fill(null).map(function(_,i){return {id:'pot'+i,name:'2-Foot Pot '+(i+1),icon:'P'+(i+1),plant:'',status:'seedling',watered:null,notes:''}; }),
+      hanging:Array(4).fill(null).map(function(_,i){return {id:'hang'+i,name:'Hanging Pot '+(i+1),icon:'H'+(i+1),plant:'',status:'seedling',watered:null,notes:''}; }),
+      gardenNotes:''
+    };
+    var activeSlot=null;
+    function save(){localStorage.setItem('weymouthGarden',JSON.stringify(garden));updateStats();}
+    function updateStats(){
+      var all=garden.beds.reduce(function(a,b){return a.concat(b.slots);},[]).concat(garden.pots).concat(garden.hanging);
+      var planted=all.filter(function(p){return p.plant;}).length;
+      var ready=all.filter(function(p){return p.status==='harvest'&&p.plant;}).length;
+      var watered=all.filter(function(p){return p.watered===today();}).length;
+      document.getElementById('statsBar').innerHTML=
+        '<div class="stat"><div class="stat-num">'+planted+'</div><div class="stat-label">Plants Growing</div></div>'+
+        '<div class="stat"><div class="stat-num">'+ready+'</div><div class="stat-label">Ready to Harvest</div></div>'+
+        '<div class="stat"><div class="stat-num">'+watered+'</div><div class="stat-label">Watered Today</div></div>'+
+        '<div class="stat"><div class="stat-num">'+(all.length-planted)+'</div><div class="stat-label">Empty Slots</div></div>';
+    }
+    function today(){return new Date().toISOString().split('T')[0];}
+    function slotHTML(slot){
+      var isP=slot.plant,isA=activeSlot===slot.id;
+      var badge=isP?'<span class="status-badge status-'+slot.status+'">'+STATUS_LABELS[slot.status]+'</span>':'';
+      var opts=STATUSES.map(function(s){return '<option value="'+s+'"'+(slot.status===s?' selected':'')+'>'+STATUS_LABELS[s]+'</option>'; }).join('');
+      var actions='<div class="slot-actions" onclick="event.stopPropagation()">'+
+        '<input type="text" placeholder="Plant name" value="'+(slot.plant||'')+'" onchange="updateName(\'' +slot.id+ '\',this.value)">'+
+        '<select onchange="updateStatus(\'' +slot.id+ '\',this.value)">'+opts+'</select>'+
+        '<input type="text" placeholder="Notes" value="'+(slot.notes||'')+'" onchange="updateNotes(\'' +slot.id+ '\',this.value)">'+
+        '<button class="btn btn-blue" onclick="waterIt(\'' +slot.id+ '\')">Log Watering</button>'+
+        (isP?'<button class="btn btn-red" onclick="clearIt(\'' +slot.id+ '\')">' +'Remove</button>':'')+
+        (slot.watered?'<div class="watering-log">Last watered: '+slot.watered+'</div>':'')+
+        '</div>';
+      return '<div class="plant-slot'+(isP?' planted':'')+(isA?' active':'')+('" onclick="toggle(\'' +slot.id+ '\')">') +
+        '<div class="slot-label">'+(isP?slot.plant:'+ Add plant')+badge+'</div>'+
+        (isP&&slot.notes?'<div class="plant-info">'+slot.notes+'</div>':'')+
+        actions+'</div>';
+    }
+    function bedHTML(bed){
+      return '<div class="zone-card beds"><div class="zone-header"><span class="zone-icon">'+bed.icon+'</span>'+
+        '<div class="zone-title"><h2>'+bed.name+'</h2><p>'+bed.size+'</p></div></div>'+
+        bed.slots.map(slotHTML).join('')+'</div>';
+    }
+    function simpleHTML(item,cls){
+      return '<div class="zone-card '+cls+'"><div class="zone-header"><span class="zone-icon">'+item.icon+'</span>'+
+        '<div class="zone-title"><h2>'+item.name+'</h2></div></div>'+slotHTML(item)+'</div>';
+    }
+    function render(){
+      document.getElementById('bedsZone').innerHTML=garden.beds.map(bedHTML).join('');
+      document.getElementById('potsZone').innerHTML=garden.pots.map(function(p){return simpleHTML(p,'pots'); }).join('');
+      document.getElementById('hangingZone').innerHTML=garden.hanging.map(function(h){return simpleHTML(h,'hanging'); }).join('');
+      document.getElementById('notesArea').value=garden.gardenNotes||'';
+      updateStats();
+    }
+    function findSlot(id){
+      for(var i=0;i<garden.beds.length;i++){for(var j=0;j<garden.beds[i].slots.length;j++){if(garden.beds[i].slots[j].id===id)return garden.beds[i].slots[j];}}
+      for(var i=0;i<garden.pots.length;i++){if(garden.pots[i].id===id)return garden.pots[i];}
+      for(var i=0;i<garden.hanging.length;i++){if(garden.hanging[i].id===id)return garden.hanging[i];}
+    }
+    function toggle(id){activeSlot=activeSlot===id?null:id;render();}
+    function updateName(id,v){findSlot(id).plant=v;save();}
+    function updateStatus(id,v){findSlot(id).status=v;save();}
+    function updateNotes(id,v){findSlot(id).notes=v;save();}
+    function clearIt(id){var s=findSlot(id);s.plant='';s.notes='';s.watered=null;s.status='seedling';activeSlot=null;save();render();}
+    function waterIt(id){findSlot(id).watered=today();save();render();}
+    function saveNotes(){garden.gardenNotes=document.getElementById('notesArea').value;save();}
+    render();
+  </script>
+</body>
+</html>
