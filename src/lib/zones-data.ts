@@ -1,0 +1,48 @@
+import type { WateringZone } from '@/types'
+
+export const DEFAULT_ZONES: WateringZone[] = [
+  {
+    id: 'z1',
+    name: 'Bed 1 (Left)',
+    outlet: 1,
+    gauge: 1,
+    durationMin: 20,
+    startTime: '06:00',
+    frequency: 'Daily',
+    flowRate: '5–6 GPH',
+    notes: '',
+  },
+  {
+    id: 'z2',
+    name: 'Bed 2 (Right)',
+    outlet: 2,
+    gauge: 2,
+    durationMin: 20,
+    startTime: '06:00',
+    frequency: 'Daily',
+    flowRate: '5–6 GPH',
+    notes: '',
+  },
+  {
+    id: 'z3',
+    name: 'Containers',
+    outlet: 3,
+    gauge: 3,
+    durationMin: 15,
+    startTime: '07:00',
+    frequency: 'Daily',
+    flowRate: '2–3 GPH',
+    notes: '',
+  },
+  {
+    id: 'z4',
+    name: 'Hanging Pots',
+    outlet: 4,
+    gauge: 4,
+    durationMin: 10,
+    startTime: '07:30',
+    frequency: 'Daily',
+    flowRate: '1–2 GPH',
+    notes: '',
+  },
+]
