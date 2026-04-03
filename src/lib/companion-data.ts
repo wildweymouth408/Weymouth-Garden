@@ -7,7 +7,7 @@ export interface CompanionPlant {
   badNeighbors: string[]
   family?: string
   spacingInches: number
-  season: 'spring' | 'summer' | 'fall' | 'winter'[]
+  season: ('spring' | 'summer' | 'fall' | 'winter')[]
   notes?: string
 }
 
@@ -168,6 +168,11 @@ export function getRecommendedSpacing(plantName: string): number {
 export function isInSeason(plantName: string, month: number): boolean {
   const plant = findCompanion(plantName)
   if (!plant) return true
-  const seasonMap = { spring: [3,4,5], summer: [6,7,8], fall: [9,10,11], winter: [12,1,2] }
+  const seasonMap: Record<'spring' | 'summer' | 'fall' | 'winter', number[]> = {
+    spring: [3,4,5],
+    summer: [6,7,8],
+    fall: [9,10,11],
+    winter: [12,1,2]
+  }
   return plant.season.some(s => seasonMap[s].includes(month))
 }

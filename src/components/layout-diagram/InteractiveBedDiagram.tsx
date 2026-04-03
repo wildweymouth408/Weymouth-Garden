@@ -96,9 +96,9 @@ export function InteractiveBedDiagram({
       let hasGood = false
       adjacent.forEach(adj => {
         if (!adj.planted) return
-        if (areBadNeighbors(cell.planted.name, adj.planted.name)) {
+        if (areBadNeighbors(cell.planted!.name, adj.planted!.name)) {
           hasBad = true
-        } else if (areGoodNeighbors(cell.planted.name, adj.planted.name)) {
+        } else if (areGoodNeighbors(cell.planted!.name, adj.planted!.name)) {
           hasGood = true
         }
       })
@@ -108,7 +108,7 @@ export function InteractiveBedDiagram({
       else cell.warning = 'neutral'
 
       // Check if plant spacing requirements exceed grid spacing
-      const recommended = getRecommendedSpacing(cell.planted.name)
+      const recommended = getRecommendedSpacing(cell.planted!.name)
       cell.spacingWarning = recommended > spacingInches
     })
     return cells
@@ -234,7 +234,7 @@ export function InteractiveBedDiagram({
 
       {/* Plant Form Modal */}
       {showPlantForm && selectedCell && (
-        <Modal onClose={handlePlantCancel} title={editingPlant ? `Edit ${editingPlant.name}` : `Add Plant to Bed ${bedId}`}>
+        <Modal open={showPlantForm} onClose={handlePlantCancel} title={editingPlant ? `Edit ${editingPlant.name}` : `Add Plant to Bed ${bedId}`}>
           <PlantForm
             initial={editingPlant ? {
               ...editingPlant,

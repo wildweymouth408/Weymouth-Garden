@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/Button'
 type FormData = Omit<PlantEntry, 'id' | 'createdAt' | 'updatedAt'>
 
 interface PlantFormProps {
-  initial?: PlantEntry
+  initial?: Partial<PlantEntry>
   onSave: (data: FormData) => void
   onCancel: () => void
 }
@@ -21,9 +21,9 @@ export function PlantForm({ initial, onSave, onCancel }: PlantFormProps) {
   const [growthStage, setGrowthStage]     = useState<GrowthStage>(initial?.growthStage ?? 'seed')
   const [notes, setNotes]                 = useState(initial?.notes ?? '')
   const [photo, setPhoto]                 = useState(initial?.photoBase64)
-  const [gridX, setGridX]                 = useState(initial?.gridX)
-  const [gridY, setGridY]                 = useState(initial?.gridY)
-  const [bedId, setBedId]                 = useState(initial?.bedId)
+  const [gridX, _setGridX]               = useState(initial?.gridX)
+  const [gridY, _setGridY]               = useState(initial?.gridY)
+  const [bedId, _setBedId]               = useState(initial?.bedId)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
