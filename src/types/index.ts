@@ -15,6 +15,10 @@ export interface PlantEntry {
   notes: string
   photoBase64?: string
   lastWatered?: string
+  // Grid coordinates (optional, for interactive layout)
+  gridX?: number
+  gridY?: number
+  bedId?: number
   createdAt: string
   updatedAt: string
 }
@@ -46,6 +50,11 @@ export interface AppSettings {
   showWeather: boolean
   showFrostReminder: boolean
   zoneNames: Record<string, string>
+}
+
+export interface BedSettings {
+  bed1Spacing: number
+  bed2Spacing: number
 }
 
 export interface WeatherData {

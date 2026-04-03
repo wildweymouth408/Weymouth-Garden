@@ -5,6 +5,7 @@ import { LAT, LON } from './dates'
 const CACHE_TTL_MS = 10 * 60 * 1000 // 10 minutes
 
 export async function fetchWeather(): Promise<WeatherData | null> {
+  // Use Vite environment variable (set in .env.local or Vercel)
   const apiKey = import.meta.env.VITE_OPENWEATHER_API_KEY as string | undefined
 
   // Return cache if fresh
@@ -13,7 +14,10 @@ export async function fetchWeather(): Promise<WeatherData | null> {
     return cached
   }
 
-  if (!apiKey) return null
+  if (!apiKey || apiKey === 'undefined' || apiKey.startsWith('your-api-key')) {
+    console.warn('OpenWeatherMap API key missing. Set VITE_OPENWEATHER_API_KEY in environment.')
+    return null
+  }
 
   try {
     const url = `https://api.openweathermap.org/data/2.5/weather?lat=${LAT}&lon=${LON}&appid=${apiKey}&units=imperial`

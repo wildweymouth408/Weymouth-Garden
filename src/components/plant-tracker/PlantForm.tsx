@@ -21,6 +21,9 @@ export function PlantForm({ initial, onSave, onCancel }: PlantFormProps) {
   const [growthStage, setGrowthStage]     = useState<GrowthStage>(initial?.growthStage ?? 'seed')
   const [notes, setNotes]                 = useState(initial?.notes ?? '')
   const [photo, setPhoto]                 = useState(initial?.photoBase64)
+  const [gridX, setGridX]                 = useState(initial?.gridX)
+  const [gridY, setGridY]                 = useState(initial?.gridY)
+  const [bedId, setBedId]                 = useState(initial?.bedId)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -35,6 +38,9 @@ export function PlantForm({ initial, onSave, onCancel }: PlantFormProps) {
       notes,
       photoBase64: photo,
       lastWatered: initial?.lastWatered,
+      gridX,
+      gridY,
+      bedId,
     })
   }
 

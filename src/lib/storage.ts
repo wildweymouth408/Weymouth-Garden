@@ -1,4 +1,4 @@
-import type { PlantEntry, WateringZone, ChecklistItem, AppSettings, WeatherData } from '@/types'
+import type { PlantEntry, WateringZone, ChecklistItem, AppSettings, WeatherData, BedSettings } from '@/types'
 
 export const KEYS = {
   plants:    'wg-plants',
@@ -6,6 +6,7 @@ export const KEYS = {
   zones:     'wg-zones',
   settings:  'wg-settings',
   weather:   'wg-weather-cache',
+  bedSettings: 'wg-bed-settings',
 } as const
 
 function getItem<T>(key: string, fallback: T): T {
@@ -62,6 +63,11 @@ export const DEFAULT_SETTINGS: AppSettings = {
     z4: 'Hanging Pots',
   },
 }
+
+export const DEFAULT_BED_SETTINGS: BedSettings = {
+  bed1Spacing: 10,
+  bed2Spacing: 10,
+}
 export function getSettings(): AppSettings {
   const stored = getItem<Partial<AppSettings>>(KEYS.settings, {})
   return { ...DEFAULT_SETTINGS, ...stored, zoneNames: { ...DEFAULT_SETTINGS.zoneNames, ...stored.zoneNames } }
@@ -76,4 +82,13 @@ export function getWeatherCache(): WeatherData | null {
 }
 export function saveWeatherCache(data: WeatherData): void {
   setItem(KEYS.weather, data)
+}
+
+// Bed settings
+export function getBedSettings(): BedSettings {
+  const stored = getItem<Partial<BedSettings>>(KEYS.bedSettings, {})
+  return { ...DEFAULT_BED_SETTINGS, ...stored }
+}
+export function saveBedSettings(settings: BedSettings): void {
+  setItem(KEYS.bedSettings, settings)
 }
